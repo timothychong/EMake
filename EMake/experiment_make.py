@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import os
 import errno
 import copy
@@ -18,6 +16,8 @@ def mkdir(dirname):
             raise
         pass
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
 class ExperimentMake(object):
 
     # support files
@@ -33,8 +33,9 @@ class ExperimentMake(object):
     _str_flattened_targets = None
     _str_flattened_folders = None
 
+
     def __init__(self):
-        pass
+        self.my_targets = self.targets()
 
     def validate(self):
         assert self.makefile
@@ -45,6 +46,9 @@ class ExperimentMake(object):
         assert self.my_targets
         return self.my_targets
 
+    def dict_sort(self, d):
+        return (d[0], d[1])
+
     def traverse_targets(self, obj):
         assert(obj)
         if isinstance(obj, list):
@@ -53,7 +57,7 @@ class ExperimentMake(object):
                 yield o
 
         elif isinstance(obj, dict):
-            for k, v in sorted(obj.iteritems(), key=lambda (k,v): (v,k)):
+            for k, v in sorted(obj.iteritems(), key=self.dict_sort):
                 out_ini = [k]
 
                 for i in self.traverse_targets(v):
@@ -145,7 +149,7 @@ class ExperimentMake(object):
             self.run_setup( oldcwd, folder_path , target)
 
             # copying support files
-            copy2(pjoin(oldcwd, self.support_run), folder_path)
+            copy2(pjoin(dir_path, self.support_run), folder_path)
 
             with open("command.sh", "w+") as handle:
                 handle.write(self.run_command(oldcwd, folder_path, target))
@@ -168,17 +172,20 @@ class ExperimentMake(object):
         # All targets
         done_file = "done"
 
+        out_str += "SHELL = /bin/bash\n"
+
         out_str += "all: "
 
         # clear lock
         out_str += "clear_lock "
 
-        target_str = " ".join([pjoin(x, done_file) for x in self.str_flattened_targets_folder()])
-        out_str += "{} ".format(target_str)
-
         for result in self.gather_result():
             for i, target in enumerate(self._str_flattened_folders):
                 out_str += "{} ".format(pjoin(class_name + '_' + result[0], self._str_flattened_targets[i]+ result[1]))
+
+        target_str = " ".join([pjoin(x, done_file) for x in self.str_flattened_targets_folder()])
+        out_str += "{} ".format(target_str)
+
         out_str += "\n\n"
 
         # clear_lock target
@@ -207,3 +214,4 @@ class ExperimentMake(object):
 
 # if __name__ == "__main__":
     # main()
+

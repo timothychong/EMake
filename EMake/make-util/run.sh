@@ -1,5 +1,7 @@
 lock=`find . -name 'lock*' | wc -l`
 
+rm -f not_done
+
 # IF there is a lock then exit (It's currently run by someone else)
 if [ "$lock" -gt 0 ]; then
     find . -name 'lock*'
@@ -24,7 +26,9 @@ echo "Running $pwdd"
 source command.sh
 
 # done
-touch done
+if [ ! -f not_done  ]; then
+    touch done
+fi
 
 # remove lock
 rm -f lock_$hostname
