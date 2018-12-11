@@ -206,7 +206,10 @@ class ExperimentMake(object):
         for result in self.gather_result():
             for i, target in enumerate(self._str_flattened_folders):
                 out_str += "{}: {}\n".format(pjoin(class_name + '_' + result[0], self._str_flattened_targets[i]+ result[1]), pjoin(target, done_file))
-                out_str += "\tcp {} {}\n".format(pjoin(target, result[0]), pjoin(class_name + '_' + result[0], self._str_flattened_targets[i]+ result[1]))
+                out_str += "\tif [ -a {} ];\\\n".format(pjoin(target, result[0]))
+                out_str += "\tthen \\\n"
+                out_str += "\t\tcp {} {}; \\\n".format(pjoin(target, result[0]), pjoin(class_name + '_' + result[0], self._str_flattened_targets[i]+ result[1]))
+                out_str += "\tfi;\n"
             out_str += "\n"
 
         with open(self.makefile, "w") as handle:

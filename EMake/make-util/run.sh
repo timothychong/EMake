@@ -1,3 +1,5 @@
+set -e
+
 lock=`find . -name 'lock*' | wc -l`
 
 rm -f not_done
@@ -19,11 +21,15 @@ fi
 hostname=`hostname`
 touch lock_$hostname
 
+
 pwdd=`pwd`
 echo "Running $pwdd"
 
 # Execute command
 source command.sh
+
+
+touch done
 
 # remove lock
 rm -f lock_$hostname

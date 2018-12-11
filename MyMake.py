@@ -19,15 +19,19 @@ class MyMake (ExperimentMake):
 
 
     def gather_result(self):
-        return []
+        return [["out", ""]]
 
     def targets(self):
         self.my_targets = {}
+        data = ["lpi_klein2", "G46"]
 
-        for batch_size in [2 ** j for j in range(2, 7)]:
-            self.my_targets[batch_size] = {}
-            for container_per_compute in [2 * j for j in range(1, 4)]:
-                self.my_targets[batch_size][container_per_compute] = [2 ** j for j in range(2, 5)]
+
+        for d in data:
+            self.my_targets[d] = {}
+            for batch_size in [2 ** j for j in range(2, 7)]:
+                self.my_targets[d][batch_size] = {}
+                for container_per_compute in [2 * j for j in range(1, 4)]:
+                    self.my_targets[d][batch_size][container_per_compute] = [2 ** j for j in range(2, 5)]
 
         return self.my_targets
 
@@ -35,7 +39,7 @@ class MyMake (ExperimentMake):
         # batch_size = params[0]
         # container_per_compute = params[1]
         # n_thread = params[2]
-        s = "./setup.sh {} {} {} {}".format(params[0], params[1], params[2], pwd)
+        s = "./setup.sh {} {} {} {} {}".format(params[0], params[1], params[2], params[3], pwd )
         return s
 
     def __init__(self):
