@@ -25,10 +25,5 @@ echo "Running $pwdd"
 # Execute command
 source command.sh
 
-# done
-if [ ! -f not_done  ]; then
-    touch done
-fi
-
 # remove lock
 rm -f lock_$hostname
