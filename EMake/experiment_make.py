@@ -8,6 +8,14 @@ def pjoin(a, b):
         return a + b
     return a + '/' + b
 
+def rm_f(f):
+    if os.path.exists(f):
+        os.remove(f)
+
+def symlnk(src_dir, dst_dir, fn):
+    rm_f(pjoin(dst_dir, fn))
+    os.symlink(pjoin(src_dir, fn), pjoin(dst_dir, fn))
+
 def mkdir(dirname):
     try:
         os.mkdir(dirname)
@@ -71,6 +79,9 @@ class ExperimentMake(object):
         else:
             yield obj
 
+    def run_dependency(self, rundir, pwd, params):
+        assert (False and "Dependency not supported yet")
+        return []
 
     def flattened_targets(self):
         if self._flattened_targets:
@@ -146,10 +157,10 @@ class ExperimentMake(object):
             # Go to every target folder and run set up
             os.chdir(folder_path)
 
-            self.run_setup( oldcwd, folder_path , target)
+            self.run_setup(oldcwd, folder_path ,target)
 
             # copying support files
-            copy2(pjoin(dir_path, self.support_run), folder_path)
+            symlnk(pjoin(dir_path, self.support_folder), folder_path, self.run_file)
 
             with open("command.sh", "w+") as handle:
                 handle.write(self.run_command(oldcwd, folder_path, target))
@@ -190,11 +201,11 @@ class ExperimentMake(object):
 
         # clear_lock target
         out_str += "clear_lock:\n"
-        out_str += "\tfind {} -name \"lock_`hostname`\" | xargs -r rm\n\n".format(self.output_folder)
-
+        out_str += "\tfind {} -maxdepth 2 -name \"lock_`hostname`\" | xargs -r rm\n\n".format(self.output_folder)
 
         for target in self.str_flattened_targets_folder():
-            out_str += "{}: | clear_lock\n".format(pjoin(target, done_file))
+            out_str += "{}: | clear_lock ".format(pjoin(target, done_file))
+            out_str += "\n"
             out_str += "\t\tpushd {} && bash {} && popd\n\n".format(target, self.run_file)
 
         # Gather results at the end

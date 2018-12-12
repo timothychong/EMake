@@ -28,8 +28,5 @@ echo "Running $pwdd"
 # Execute command
 source command.sh
 
-
-touch done
-
 # remove lock
 rm -f lock_$hostname
